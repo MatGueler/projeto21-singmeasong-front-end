@@ -43,7 +43,7 @@ export default function Recommendation({
   }, [errorDownvotingRecommendation]);
 
   return (
-    <Container data-cy={name}>
+    <Container data-tag="Container" data-cy={name}>
       <Row>{name}</Row>
       <ReactPlayer url={youtubeLink} width="100%" height="100%" />
       <Row>

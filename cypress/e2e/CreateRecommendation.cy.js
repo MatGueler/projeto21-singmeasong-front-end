@@ -6,6 +6,15 @@ const recomendation = {
   youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
 };
 
+// - Get recomendations tests
+describe("Test get recommendations", () => {
+  it("Get all test", () => {
+    cy.visit(url);
+    cy.get(`[data-tag=Container]`).its("length").should("be.lte", 10);
+    cy.url().should("equal", url);
+  });
+});
+
 // - Criation tests
 describe("Test create recommendation", () => {
   it("Create a new test", () => {
