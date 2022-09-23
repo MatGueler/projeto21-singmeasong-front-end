@@ -1,15 +1,44 @@
 import { faker } from "@faker-js/faker";
 const url = "http://localhost:3000/";
 
-const name = faker.name.jobType();
+const recomendation = {
+  name: faker.name.jobType(),
+  youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
+};
 
 // - Criation tests
 describe("Test create recommendation", () => {
   it("Create a new test", () => {
     cy.visit(url);
-    cy.get("[data-cy=Name]").type(name);
-    cy.get("[data-cy=Url]").type("https://www.youtube.com/watch?v=kXYiU_JCYtU");
+    const recomendation = {
+      name: faker.name.jobType(),
+      youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
+    };
+
+    // * Write in inputs all informations about recommendation
+    cy.get("[data-cy=Name]").type(recomendation.name);
+    cy.get("[data-cy=Url]").type(recomendation.youtubeLink);
     cy.get("[data-cy=Create]").click();
+    cy.url().should("equal", url);
+  });
+
+  it("Create a repeated test", () => {
+    cy.visit(url);
+    const recomendation = {
+      name: faker.name.jobType(),
+      youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
+    };
+
+    // * Create a recommendation directly on database
+    cy.CreateRecommendation(recomendation);
+
+    // * Try create a new recommendation with already existent name
+    cy.get("[data-cy=Name]").type(recomendation.name);
+    cy.get("[data-cy=Url]").type(recomendation.youtubeLink);
+    cy.get("[data-cy=Create]").click();
+
+    // * Verify if exist just one test with same name
+    cy.get(`[data-cy=${recomendation.name}]`).should("have.length", 1);
     cy.url().should("equal", url);
   });
 });
@@ -46,14 +75,10 @@ describe("Test Downvote recomendation", () => {
   it("Add more than 5 dislikes and exclude recommendation", () => {
     cy.visit(url);
 
-    // // * Create a new recommendation
-    // const name = faker.name.jobType();
-    // cy.get("[data-cy=Name]").type(name);
-    // cy.get("[data-cy=Url]").type("https://www.youtube.com/watch?v=kXYiU_JCYtU");
-    // cy.get("[data-cy=Create]").click();
+    cy.CreateRecommendation(recomendation);
 
     // * Add 6 dislikes to this recomendation
-    cy.get(`[data-cy=${name}]`).within(() => {
+    cy.get(`[data-cy=${recomendation.name}]`).within(() => {
       cy.get("[data-cy=Downvote]").click();
       cy.get("[data-cy=Downvote]").click();
       cy.get("[data-cy=Downvote]").click();
@@ -63,7 +88,7 @@ describe("Test Downvote recomendation", () => {
     });
 
     //  * Verify if this recommendation exist
-    cy.contains(`[data-cy=${name}]`).should("not.exist");
+    cy.contains(`[data-cy=${recomendation.name}]`).should("not.exist");
     cy.url().should("equal", url);
   });
 });
