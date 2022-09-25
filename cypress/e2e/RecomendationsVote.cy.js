@@ -6,14 +6,23 @@ const recomendation = {
   youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
 };
 
+beforeEach(async () => {
+  await cy.request("POST", "http://localhost:5000/e2e/reset", {});
+});
+
 //  - Upvote tests
 describe("Test Upvote recomendation", () => {
   it("Add a like to this recommendation", () => {
     cy.visit(url);
 
+    cy.CreateRecommendation(recomendation);
+
     // * Add one like to this recommendation
-    cy.get("[data-cy=Representative]").within(() => {
+    cy.get(`[data-cy=${recomendation.name}]`).within(() => {
+      cy.get("[data-tag=Score]").contains(0);
+      cy.intercept("http://localhost:5000/e2e/reset");
       cy.get("[data-cy=Upvote]").click();
+      cy.get("[data-tag=Score]").contains(1);
     });
 
     // * Verify if url is correct
@@ -26,9 +35,13 @@ describe("Test Downvote recomendation", () => {
   it("Add a dislike to this recommendation", () => {
     cy.visit(url);
 
+    cy.CreateRecommendation(recomendation);
+
     // * Add one dislike to this recommendation
-    cy.get("[data-cy=Representative]").within(() => {
+    cy.get(`[data-cy=${recomendation.name}]`).within(() => {
+      cy.get("[data-tag=Score]").contains(0);
       cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-tag=Score]").contains(-1);
     });
 
     // * Verify if url is correct
