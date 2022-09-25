@@ -6,6 +6,10 @@ const recomendation = {
   youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
 };
 
+beforeEach(async () => {
+  await cy.request("POST", "http://localhost:5000/e2e/reset", {});
+});
+
 //  - Upvote tests
 describe("Test Upvote recomendation", () => {
   it("Add a like to this recommendation", () => {
@@ -16,6 +20,7 @@ describe("Test Upvote recomendation", () => {
     // * Add one like to this recommendation
     cy.get(`[data-cy=${recomendation.name}]`).within(() => {
       cy.get("[data-tag=Score]").contains(0);
+      cy.intercept("http://localhost:5000/e2e/reset");
       cy.get("[data-cy=Upvote]").click();
       cy.get("[data-tag=Score]").contains(1);
     });
@@ -26,36 +31,40 @@ describe("Test Upvote recomendation", () => {
 });
 
 // - Downvote tests
-// describe("Test Downvote recomendation", () => {
-//   it("Add a dislike to this recommendation", () => {
-//     cy.visit(url);
+describe("Test Downvote recomendation", () => {
+  it("Add a dislike to this recommendation", () => {
+    cy.visit(url);
 
-//     // * Add one dislike to this recommendation
-//     cy.get("[data-cy=Representative]").within(() => {
-//       cy.get("[data-cy=Downvote]").click();
-//     });
+    cy.CreateRecommendation(recomendation);
 
-//     // * Verify if url is correct
-//     cy.url().should("equal", url);
-//   });
+    // * Add one dislike to this recommendation
+    cy.get(`[data-cy=${recomendation.name}]`).within(() => {
+      cy.get("[data-tag=Score]").contains(0);
+      cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-tag=Score]").contains(-1);
+    });
 
-//   // it("Add more than 5 dislikes and exclude recommendation", () => {
-//   //   cy.visit(url);
+    // * Verify if url is correct
+    cy.url().should("equal", url);
+  });
 
-//   //   cy.CreateRecommendation(recomendation);
+  it("Add more than 5 dislikes and exclude recommendation", () => {
+    cy.visit(url);
 
-//   //   // * Add 6 dislikes to this recomendation
-//   //   cy.get(`[data-cy=${recomendation.name}]`).within(() => {
-//   //     cy.get("[data-cy=Downvote]").click();
-//   //     cy.get("[data-cy=Downvote]").click();
-//   //     cy.get("[data-cy=Downvote]").click();
-//   //     cy.get("[data-cy=Downvote]").click();
-//   //     cy.get("[data-cy=Downvote]").click();
-//   //     cy.get("[data-cy=Downvote]").click();
-//   //   });
+    cy.CreateRecommendation(recomendation);
 
-//   //   //  * Verify if this recommendation exist
-//   //   cy.contains(`[data-cy=${recomendation.name}]`).should("not.exist");
-//   //   cy.url().should("equal", url);
-//   // });
-// });
+    // * Add 6 dislikes to this recomendation
+    cy.get(`[data-cy=${recomendation.name}]`).within(() => {
+      cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-cy=Downvote]").click();
+      cy.get("[data-cy=Downvote]").click();
+    });
+
+    //  * Verify if this recommendation exist
+    cy.contains(`[data-cy=${recomendation.name}]`).should("not.exist");
+    cy.url().should("equal", url);
+  });
+});

@@ -5,11 +5,6 @@ beforeEach(async () => {
   await cy.request("POST", "http://localhost:5000/e2e/reset", {});
 });
 
-const recomendation = {
-  name: faker.name.jobType(),
-  youtubeLink: "https://www.youtube.com/watch?v=kXYiU_JCYtU",
-};
-
 // - Criation tests
 describe("Test create recommendation", () => {
   it("Create a new test", () => {
@@ -22,7 +17,10 @@ describe("Test create recommendation", () => {
     // * Write in inputs all informations about recommendation
     cy.get("[data-cy=Name]").type(recomendation.name);
     cy.get("[data-cy=Url]").type(recomendation.youtubeLink);
+    cy.intercept("POST", "http://localhost:5000/recommendations").as("create");
     cy.get("[data-cy=Create]").click();
+    cy.wait("@create");
+
     cy.url().should("equal", url);
   });
 
@@ -39,7 +37,9 @@ describe("Test create recommendation", () => {
     // * Try create a new recommendation with already existent name
     cy.get("[data-cy=Name]").type(recomendation.name);
     cy.get("[data-cy=Url]").type(recomendation.youtubeLink);
+    cy.intercept("POST", "http://localhost:5000/recommendations").as("create");
     cy.get("[data-cy=Create]").click();
+    cy.wait("@create");
 
     // * Verify if exist just one test with same name
     cy.get(`[data-cy=${recomendation.name}]`).should("have.length", 1);
